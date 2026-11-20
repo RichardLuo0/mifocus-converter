@@ -1,0 +1,7 @@
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version = "1.19.1" }
+libxposed-api = { module = "io.github.libxposed:api", version = "102.0.0" }
+
+[plugins]
+android-application = { id = "com.android.application", version = "9.5.2" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version = "2.4.21" }

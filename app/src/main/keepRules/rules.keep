@@ -1,0 +1,18 @@
+# Add project specific R8 rules here.
+# AGP will combine all keep rule files in src/main/keepRules to pass to R8
+#
+# For more details, see
+#   https://d.android.com/r/tools/r8/keep-rules
+
+# META-INF/xposed/java_init.list 里写的是全限定名，入口类不能被混淆/裁掉
+-keep class com.richardluo.mifocusconverter.xposed.XposedMain
+-keep class com.richardluo.mifocusconverter.xposed.XposedMain {
+    public <init>();
+}
+
+-keep,allowoptimization,allowobfuscation public class * extends io.github.libxposed.api.XposedModule {
+    public <init>();
+}
+
+-dontwarn io.github.libxposed.annotation.**
+-adaptresourcefilecontents META-INF/xposed/java_init.list

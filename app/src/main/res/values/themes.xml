@@ -1,0 +1,4 @@
+<resources>
+    <!-- 无界面模块，用平台主题即可，不依赖 Material Components -->
+    <style name="Theme.MifocusConverter" parent="@android:style/Theme.DeviceDefault.DayNight" />
+</resources>
