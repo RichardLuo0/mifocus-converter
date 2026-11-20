@@ -1,0 +1,116 @@
+name: Release CI
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - version.properties
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+#      - uses: ashutoshgngwr/validate-fastlane-supply-metadata@v2
+#        with:
+#          fastlaneDir: ./metadata
+
+      - name: Write sign info
+        run: |
+          if [ ! -z "${{ secrets.KEYSTORE }}" ]; then
+            echo storePassword='${{ secrets.KEYSTORE_PASSWORD }}' >> keystore.properties
+            echo keyAlias='${{ secrets.KEY_ALIAS }}' >> keystore.properties
+            echo keyPassword='${{ secrets.KEY_PASSWORD }}' >> keystore.properties
+            echo storeFile='${{ github.workspace }}/key.jks' >> keystore.properties
+            echo ${{ secrets.KEYSTORE }} | base64 --decode > ${{ github.workspace }}/key.jks
+          fi
+
+      - name: Build with Gradle
+        run: chmod +x gradlew && ./gradlew assembleRelease
+
+      - name: Save version
+        id: save_version
+        run: |
+          VERSION_NAME=$(./gradlew printVersion -q)
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
+          LATEST_TAG=$(gh release view --json tagName -q .tagName)
+          echo "LATEST_TAG=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Changelog
+        id: build_changelog
+        uses: mikepenz/release-changelog-builder-action@v5
+        with:
+          mode: "HYBRID"
+          fromTag: ${{ steps.save_version.outputs.LATEST_TAG }}
+          toTag: ${{ github.sha }}
+          configurationJson: |
+            {
+              "categories": [
+                {
+                  "title": "## 🚀 Features",
+                  "labels": [
+                    "feat"
+                  ]
+                },
+                {
+                  "title": "## 🐛 Fixes",
+                  "labels": [
+                    "fix",
+                    "perf",
+                    "refactor",
+                    "revert"
+                  ]
+                },
+                {
+                  "title": "## 💬 Other",
+                  "labels": [
+                    "build",
+                    "chore",
+                    "ci",
+                    "docs"
+                  ]
+                }
+              ],
+              "label_extractor": [
+                {
+                  "pattern": "^(build|chore|ci|docs|feat|fix|perf|refactor|revert)(\\([^()]+\\))?:(.|\n)*",
+                  "target": "$1"
+                }
+              ]
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.save_version.outputs.VERSION_NAME }}
+          artifacts: "app/build/outputs/apk/release/app-release.apk"
+          body: ${{ steps.build_changelog.outputs.changelog }}
+          prerelease: true
+          allowUpdates: true
+          updateOnlyUnreleased: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: ncipollo/release-action@v1
+        with:
+          owner: Xposed-Modules-Repo
+          repo: com.richardluo.globalIconPack
+          tag: ${{ steps.save_version.outputs.VERSION_NAME }}
+          artifacts: "app/build/outputs/apk/release/app-release.apk"
+          body: ${{ steps.build_changelog.outputs.changelog }}
+          prerelease: true
+          allowUpdates: true
+          updateOnlyUnreleased: true
+          token: ${{ secrets.LSPOSED_RELEASE_TOKEN }}
