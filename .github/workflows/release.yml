@@ -103,14 +103,14 @@ jobs:
           updateOnlyUnreleased: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: ncipollo/release-action@v1
-        with:
-          owner: Xposed-Modules-Repo
-          repo: com.richardluo.globalIconPack
-          tag: ${{ steps.save_version.outputs.VERSION_NAME }}
-          artifacts: "app/build/outputs/apk/release/app-release.apk"
-          body: ${{ steps.build_changelog.outputs.changelog }}
-          prerelease: true
-          allowUpdates: true
-          updateOnlyUnreleased: true
-          token: ${{ secrets.LSPOSED_RELEASE_TOKEN }}
+#      - uses: ncipollo/release-action@v1
+#        with:
+#          owner: Xposed-Modules-Repo
+#          repo: com.richardluo.mifocusconverter
+#          tag: ${{ steps.save_version.outputs.VERSION_NAME }}
+#          artifacts: "app/build/outputs/apk/release/app-release.apk"
+#          body: ${{ steps.build_changelog.outputs.changelog }}
+#          prerelease: true
+#          allowUpdates: true
+#          updateOnlyUnreleased: true
+#          token: ${{ secrets.LSPOSED_RELEASE_TOKEN }}
