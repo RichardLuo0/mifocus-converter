@@ -146,7 +146,7 @@ object LiveUpdateConverter {
     applyActions(notification, extras, param, pkg, context)
     extras.putBoolean(EXTRA_CONVERTED, true)
 
-    log(
+    logD(
         "$pkg: converted focus notification to live update" +
             (param.business?.let { " (business=$it)" } ?: ""),
     )
